@@ -1,4 +1,7 @@
-﻿using MailKit.Net.Smtp;
+﻿using EmailonNetCore.Data;
+using EmailonNetCore.DTOs;
+using EmailonNetCore.Model;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +14,41 @@ namespace EmailonNetCore.Controllers
     [ApiController]
     public class EmailController : ControllerBase
     {
+
+        private readonly UserData _userdata;
+        public EmailController(UserData userdata) 
+        {
+            _userdata = userdata;
+        }
+
+        [HttpPost]
+        public IActionResult InputData([FromBody] InputUsersDTO inputDTO) 
+        {
+            try 
+            {
+                Users users = new()
+                {
+                    Name = inputDTO.Name,
+                    Email = inputDTO.Email,
+                    Task = inputDTO.Task,
+                };
+
+                bool result = _userdata.InputData(users);
+                if (result)
+                {
+                    return StatusCode(201, "Data inserted");
+                }
+                else
+                {
+                    return StatusCode(500, "Data not inserted");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpPost]
         public IActionResult SendEmail(string body)
         {
